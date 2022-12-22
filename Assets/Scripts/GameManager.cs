@@ -9,7 +9,6 @@ public class GameManager : MonoBehaviour
 {
     public GameState gameState;
 
-    public string wordListPath = "Assets/wordlist.txt";
     private List<string> _words;
     [SerializeField]
     private string _word;
@@ -56,6 +55,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        //read in dictionary of words to choose from
+        string wordListPath = $"{Application.streamingAssetsPath}/wordlist.txt";
+        _words = ReadFileLines(wordListPath);
+
         //populate dictionary of letter buttons and add functionality
         _letterButtons = new Dictionary<string, Button>();
         foreach (Button key in keyboard.GetComponentsInChildren<Button>())
@@ -70,7 +73,6 @@ public class GameManager : MonoBehaviour
         aliveMan.SetActive(false);
         
         gameState = GameState.MainMenu;
-        _words = ReadFileLines(wordListPath);
     }
 
     // Update is called once per frame
