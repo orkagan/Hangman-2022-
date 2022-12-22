@@ -14,8 +14,17 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private string _word;
     public TextMeshProUGUI displayText;
+    public string guessedLetters;
+    public int wrongGuesses;
+
+    public GameObject keyboard;
+    private Dictionary<string, Button> _letterButtons;
 
     public List<GameObject> limbs;
+    public GameObject hangedMan;
+    public GameObject aliveMan;
+    public TextMeshProUGUI winText;
+    public TextMeshProUGUI loseText;
 
     #region Singleton Setup
     //Staticly typed property setup for GameManager.Instance
@@ -44,8 +53,22 @@ public class GameManager : MonoBehaviour
     #endregion
 
     // Start is called before the first frame update
+
     void Start()
     {
+        //populate dictionary of letter buttons and add functionality
+        _letterButtons = new Dictionary<string, Button>();
+        foreach (Button key in keyboard.GetComponentsInChildren<Button>())
+        {
+            Button button = key.GetComponent<Button>();
+            //adds onClick event to make guess based on the name of the gameObject
+            button.onClick.AddListener(delegate { MakeGuess(key.name); });
+            _letterButtons.Add(key.name.ToLower(), button);
+        }
+
+        hangedMan.SetActive(false);
+        aliveMan.SetActive(false);
+        
         gameState = GameState.MainMenu;
         _words = ReadFileLines(wordListPath);
     }
@@ -54,6 +77,25 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
+    }
+    private void OnGUI()
+    {
+        #region Keyboard Input Handler
+        Event e = Event.current;
+
+        //Check of in the game state
+        //Check the type of the current event, making sure to take in only the KeyDown of the keystroke.
+        //char.IsLetter to filter out all other KeyCodes besides alphabetical.
+        if (gameState == GameState.Game &&
+            e.type == EventType.KeyDown &&
+            e.keyCode.ToString().Length == 1 &&
+            char.IsLetter(e.keyCode.ToString()[0]))
+        {
+            //This is your desired action
+            //Debug.Log("Detected key code: " + e.keyCode);
+            MakeGuess(e.keyCode.ToString().ToLower());
+        }
+        #endregion
     }
 
     public List<string> ReadFileLines(string filePath)
@@ -77,6 +119,9 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         gameState = GameState.Game;
+        MenuHandler.Instance.ChangeScreen();
+        wrongGuesses = 0;
+        guessedLetters = "";
         ChooseRandomWord(_words);
         //display blanks of chosen word letters
         displayText.text = "";
@@ -84,10 +129,39 @@ public class GameManager : MonoBehaviour
         {
             displayText.text += "_";
         }
+
+        //disable sketch of hangman
+        foreach (GameObject limb in limbs)
+        {
+            limb.SetActive(false);
+        }
+        //disable hanged/alive man models
+        hangedMan.SetActive(false);
+        aliveMan.SetActive(false);
+
+        //enable keyboard buttons
+        foreach (KeyValuePair<string,Button> item in _letterButtons)
+        {
+            item.Value.interactable = true;
+        }
     }
 
-    public void MakeGuess(char letter)
+    public void MakeGuess(string letter)
     {
+        //check if letter has already been guessed
+        if (guessedLetters.Contains(letter) || gameState != GameState.Game)
+        {
+            return;
+        }
+        else
+        {
+            //add letter to guessed letters
+            guessedLetters += letter;
+            //disable button
+            Debug.Log($"Disable: {letter}");
+            _letterButtons[letter].interactable = false;
+        }
+
         if (_word.Contains(letter))
         {
             //correct guess
@@ -96,28 +170,58 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < _word.Length; i++)
             {
                 //adds revealed letter
-                if (_word[i]==letter) newText += letter;
+                if (_word[i].ToString()==letter) newText += letter;
                 //or adds existing char
                 else newText += displayText.text[i];
             }
             displayText.text = newText;
 
             //check if game over
+            if (!displayText.text.Contains("_"))
+            {
+                Win();
+                return;
+            }
         }
         else
         {
             //wrong guess
-            //add limb
-            for (int i = 0; i < limbs.Count; i++)
-            {
-                if (!limbs[i].activeSelf)
-                {
-                    limbs[i].SetActive(true);
-                    break;
-                }
-            }
+            wrongGuesses++;
             //check if game over
+            if (wrongGuesses>limbs.Count)
+            {
+                Lose();
+                return;
+            }
+            //show limb
+            if(limbs!=null) limbs[wrongGuesses-1].SetActive(true);
         }
+    }
+
+    public void Win()
+    {
+        //a winner is you
+        gameState = GameState.Win;
+        MenuHandler.Instance.ChangeScreen();
+
+        //show word
+        winText.text = _word;
+
+        //show a man walking free
+        aliveMan.SetActive(true);
+    }
+
+    public void Lose()
+    {
+        //skill issue
+        gameState = GameState.Lose;
+        MenuHandler.Instance.ChangeScreen();
+
+        //show word
+        loseText.text = _word;
+
+        //fatality
+        hangedMan.SetActive(true);
     }
 
 }
