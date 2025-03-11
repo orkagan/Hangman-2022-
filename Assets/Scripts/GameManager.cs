@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -56,8 +57,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         //read in dictionary of words to choose from
-        string wordListPath = $"{Application.streamingAssetsPath}/wordlist.txt";
-        _words = ReadFileLines(wordListPath);
+        //string wordListPath = $"{Application.streamingAssetsPath}/wordlist.txt";
+        /*string wordListPath = Path.Combine(Application.streamingAssetsPath, "wordlist.txt");
+        _words = ReadFileLines(wordListPath);*/
+        TextAsset loadedWords = Resources.Load<TextAsset>("wordlist");
+        _words = loadedWords.text.Split().ToList();
 
         //populate dictionary of letter buttons and add functionality
         _letterButtons = new Dictionary<string, Button>();
