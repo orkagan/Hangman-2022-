@@ -61,6 +61,9 @@ public class MenuHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = 60;
+        //QualitySettings.vSyncCount = 1;
+
         //Sun rising intro
         Quaternion sunEndRot = sun.transform.rotation;
         sun.transform.rotation = Quaternion.Euler(-90,0,0); //jank-aly setting the rotation so the sky starts dark
