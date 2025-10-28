@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
     public void ChooseRandomWord(List<string> words)
     {
         _word = words[Random.Range(0,words.Count)];
+        Debug.Log($"Random word chosen{_word}");
     }
 
     public void StartGame()

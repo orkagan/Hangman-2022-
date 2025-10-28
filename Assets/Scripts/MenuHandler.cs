@@ -98,7 +98,7 @@ public class MenuHandler : MonoBehaviour
     {
         //start game
         GameManager.Instance.StartGame();
-        ChangeScreen();
+        //ChangeScreen();
     }
 
     public void Pause()
