@@ -56,6 +56,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 1;
+        
         //read in dictionary of words to choose from
         //string wordListPath = $"{Application.streamingAssetsPath}/wordlist.txt";
         /*string wordListPath = Path.Combine(Application.streamingAssetsPath, "wordlist.txt");
@@ -125,7 +128,6 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         gameState = GameState.Game;
-        MenuHandler.Instance.ChangeScreen();
         wrongGuesses = 0;
         guessedLetters = "";
         ChooseRandomWord(_words);

@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 public class MenuHandler : MonoBehaviour
 {
-    //Sun rising intro
-    public GameObject sun;
-    public float sunRotSpeed = 0.3f;
-
     #region Dictionary in inspector workaround
     //workaround to get a sort of dictionary editable in inspector by having a list of structs
     [Serializable]
@@ -61,11 +57,6 @@ public class MenuHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Sun rising intro
-        Quaternion sunEndRot = sun.transform.rotation;
-        sun.transform.rotation = Quaternion.Euler(-90,0,0); //jank-aly setting the rotation so the sky starts dark
-        StartCoroutine(RotateFromTo(sun.transform, sunEndRot, sunRotSpeed)); //coroutine lerps back to original rot
-
         //workaround populating the dictionary
         _screens = new Dictionary<string, GameObject>();
         foreach (namedObj screen in screens)
@@ -160,18 +151,6 @@ public class MenuHandler : MonoBehaviour
         Debug.Log("ExitGame attempted.");
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
-    }
-
-    IEnumerator RotateFromTo(Transform transform, Quaternion target, float rotSpeed)
-    {
-        Quaternion startRot = transform.rotation;
-        float t = 0;
-        while (Quaternion.Angle(transform.rotation,target)>0.001)
-        {
-            transform.rotation = Quaternion.Lerp(startRot, target, t * rotSpeed);
-            t += Time.deltaTime;
-            yield return null;
-        }
     }
 
     IEnumerator PageInView(Vector3 pagePos)
